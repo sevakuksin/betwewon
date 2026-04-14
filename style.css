@@ -19,9 +19,9 @@
   --frame: #ffd23f;
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 
-  /* Residue class colors (capsules) */
-  --aa-positive: #3b82f6;
-  --aa-negative: #ef4444;
+  /* Residue class colors (capsules) — positive = red, negative = blue */
+  --aa-positive: #ef4444;
+  --aa-negative: #3b82f6;
   --aa-hydrophobic: #f59e0b;
   --aa-polar: #22c55e;
   --aa-small: #2dd4bf;
@@ -970,10 +970,10 @@ body {
 }
 
 .aa--class-positive {
-  background: linear-gradient(145deg, var(--aa-positive), #1d4ed8);
+  background: linear-gradient(145deg, var(--aa-positive), #b91c1c);
 }
 .aa--class-negative {
-  background: linear-gradient(145deg, var(--aa-negative), #b91c1c);
+  background: linear-gradient(145deg, var(--aa-negative), #1d4ed8);
 }
 .aa--class-hydrophobic {
   background: linear-gradient(145deg, var(--aa-hydrophobic), #d97706);
@@ -996,15 +996,15 @@ body {
 }
 
 .rule-hl--positive {
-  color: #dbeafe;
-  background: rgba(59, 130, 246, 0.32);
-  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.45);
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.45);
 }
 
 .rule-hl--negative {
-  color: #fecaca;
-  background: rgba(239, 68, 68, 0.28);
-  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.45);
+  color: #dbeafe;
+  background: rgba(59, 130, 246, 0.32);
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.45);
 }
 
 .rule-hl--hydrophobic {
@@ -1026,7 +1026,7 @@ body {
 }
 
 .rule-hl--charge {
-  background: linear-gradient(90deg, #93c5fd, #fecaca);
+  background: linear-gradient(90deg, #fca5a5, #93c5fd);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1421,7 +1421,7 @@ button,
 
 @media (max-width: 720px) {
   :root {
-    --reel-row-h: 48px;
+    --reel-row-h: 40px;
     --content-max: 100%;
   }
 
@@ -1479,20 +1479,22 @@ button,
   }
 
   .slot-machine__reels .aa--reel {
-    min-width: 1.35rem;
-    height: 1.35rem;
-    font-size: 0.72rem;
+    min-width: 1.05rem;
+    height: 1.05rem;
+    font-size: 0.58rem;
+    border-radius: 0.28rem;
   }
 
   .aa--reel {
-    min-width: 1.5rem;
-    height: 1.5rem;
-    font-size: 0.8rem;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    font-size: 0.62rem;
+    border-radius: 0.3rem;
   }
 
   .reel__row {
-    gap: 0.12rem;
-    padding: 0 0.1rem;
+    gap: 0.08rem;
+    padding: 0 0.06rem;
   }
 
   /* Long CDR3 row: swipe horizontally instead of wrapping off-screen */
@@ -1523,9 +1525,16 @@ button,
   }
 
   .slot-row .aa {
-    min-width: 2.5rem;
-    height: 2.5rem;
-    font-size: 0.95rem;
+    min-width: 1.95rem;
+    height: 1.95rem;
+    font-size: 0.78rem;
+    border-radius: 0.4rem;
+  }
+
+  .mutation-options .aa {
+    min-width: 2.65rem;
+    height: 2.65rem;
+    font-size: 1.1rem;
   }
 
   .stat-row {
@@ -1559,7 +1568,7 @@ button,
 
 @media (max-width: 480px) {
   :root {
-    --reel-row-h: 44px;
+    --reel-row-h: 36px;
     --app-max: 100%;
   }
 
@@ -1597,9 +1606,16 @@ button,
   }
 
   .slot-machine__reels .aa--reel {
-    min-width: 1.22rem;
-    height: 1.22rem;
-    font-size: 0.68rem;
+    min-width: 0.95rem;
+    height: 0.95rem;
+    font-size: 0.52rem;
+    border-radius: 0.22rem;
+  }
+
+  .aa--reel {
+    min-width: 1.02rem;
+    height: 1.02rem;
+    font-size: 0.55rem;
   }
 
   .slot-machine__marquee-inner {
@@ -1608,9 +1624,15 @@ button,
   }
 
   .slot-row .aa {
-    min-width: 2.35rem;
-    height: 2.35rem;
-    font-size: 0.88rem;
+    min-width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.7rem;
+  }
+
+  .mutation-options .aa {
+    min-width: 2.45rem;
+    height: 2.45rem;
+    font-size: 1rem;
   }
 }
 

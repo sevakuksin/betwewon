@@ -84,7 +84,18 @@ const CDR3_LEN = 10;
 /** @type {("V"|"D"|"J")[]} */
 const REEL_KEYS = ["V", "D", "J"];
 const REEL_LENGTHS = { V: 3, D: 4, J: 3 };
-const REEL_ROW_PX = 54;
+
+/** Fallback if CSS var missing; real spin distance uses measured `.reel__row` height (matches `--reel-row-h`). */
+const REEL_ROW_PX_FALLBACK = 54;
+
+/**
+ * @returns {number}
+ */
+function getReelRowHeightPx() {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue("--reel-row-h").trim();
+  const n = parseFloat(raw);
+  return Number.isFinite(n) && n > 0 ? n : REEL_ROW_PX_FALLBACK;
+}
 
 /**
  * @param {string[]} cdr3 length {@link CDR3_LEN}
@@ -826,13 +837,12 @@ function buildSpinningReelsInnerHTML(segments) {
     for (let r = 0; r < numJunkRows; r++) rows.push(randomSegmentLetters(len));
     rows.push(finalRow);
     const rowHtml = rows.map((lets) => `<div class="reel__row">${reelRowCapsulesHTML(lets)}</div>`).join("");
-    const targetY = (rows.length - 1) * REEL_ROW_PX;
     const durationSec = 2.85 + reelIdx * 1.1;
     return `
       <div class="reel reel--spinning" data-reel-idx="${reelIdx}">
         <div class="reel__label">${key}</div>
         <div class="reel__window">
-          <div class="reel__strip" data-target-y="${targetY}" data-duration="${durationSec}" style="transform: translateY(0)">
+          <div class="reel__strip" data-duration="${durationSec}" style="transform: translateY(0)">
             ${rowHtml}
           </div>
         </div>
@@ -851,8 +861,12 @@ function runSlotReelAnimation(container, segments, onDone) {
 
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
+      const sampleRow = container.querySelector(".reel__strip .reel__row");
+      const measured = sampleRow?.getBoundingClientRect().height ?? 0;
+      const rowPx = measured > 0 ? measured : getReelRowHeightPx();
       strips.forEach((strip) => {
-        const y = Number(strip.dataset.targetY);
+        const nRows = strip.querySelectorAll(".reel__row").length;
+        const y = Math.max(0, nRows - 1) * rowPx;
         const dur = Number(strip.dataset.duration);
         strip.style.transition = `transform ${dur}s cubic-bezier(0.1, 0.72, 0.12, 1)`;
         strip.style.transform = `translateY(-${y}px)`;
