@@ -47,6 +47,11 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 html,
 body {
   margin: 0;
@@ -61,7 +66,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 1rem clamp(0.75rem, 3vw, 2.5rem) 3rem;
+  padding: max(1rem, env(safe-area-inset-top, 0px))
+    max(env(safe-area-inset-right, 0px), clamp(0.75rem, 3vw, 2.5rem))
+    max(2.5rem, env(safe-area-inset-bottom, 0px))
+    max(env(safe-area-inset-left, 0px), clamp(0.75rem, 3vw, 2.5rem));
+  overflow-x: clip;
 }
 
 #app {
@@ -1397,4 +1406,222 @@ body {
   margin: -0.75rem auto 1.25rem;
   max-width: var(--content-max);
   font-style: italic;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mobile & narrow viewports — touch, scroll, safe areas */
+/* -------------------------------------------------------------------------- */
+
+button,
+.antigen-card,
+.slot-lever,
+.slot-row--interactive .aa--cdr3 {
+  touch-action: manipulation;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --reel-row-h: 48px;
+    --content-max: 100%;
+  }
+
+  .app-header {
+    padding-top: max(0.65rem, env(safe-area-inset-top, 0px));
+  }
+
+  .risk-corner {
+    top: max(4.25rem, calc(env(safe-area-inset-top, 0px) + 3.25rem));
+    right: max(0.65rem, env(safe-area-inset-right, 0px));
+    padding: 0.4rem 0.65rem;
+  }
+
+  .risk-corner__label {
+    font-size: 0.58rem;
+  }
+
+  .risk-corner__value {
+    font-size: 1.05rem;
+  }
+
+  .screen {
+    padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
+  }
+
+  /* Stack slot cabinet: panel full width, lever below (thumb-friendly) */
+  .slot-machine__cabinet {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .slot-machine__panel {
+    flex: 1 1 auto;
+    max-width: 100%;
+  }
+
+  .slot-lever {
+    width: 64px;
+    height: 148px;
+    margin-top: 0.35rem;
+  }
+
+  .slot-machine__reels {
+    gap: 0.28rem;
+    padding: 0.45rem 0.35rem 0.55rem;
+  }
+
+  .reel {
+    max-width: 118px;
+  }
+
+  .slot-machine__reels .reel:nth-child(2) {
+    max-width: 148px;
+  }
+
+  .slot-machine__reels .aa--reel {
+    min-width: 1.35rem;
+    height: 1.35rem;
+    font-size: 0.72rem;
+  }
+
+  .aa--reel {
+    min-width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  .reel__row {
+    gap: 0.12rem;
+    padding: 0 0.1rem;
+  }
+
+  /* Long CDR3 row: swipe horizontally instead of wrapping off-screen */
+  .slot-row {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    gap: 0.22rem;
+    padding: 0.65rem 0.5rem;
+    max-width: 100%;
+  }
+
+  .slot-row .slot-ellipsis,
+  .slot-row .slot-context,
+  .slot-row .slot-frame {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+
+  .slot-frame {
+    gap: 0.2rem;
+    padding: 0.35rem 0.45rem;
+  }
+
+  .slot-row .aa {
+    min-width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.95rem;
+  }
+
+  .stat-row {
+    grid-template-columns: minmax(4.5rem, 28%) minmax(0, 1fr) minmax(2rem, 18vw);
+    gap: 0.45rem;
+  }
+
+  .stat-row__label {
+    font-size: 0.72rem;
+  }
+
+  .mutation-bar {
+    gap: 0.75rem;
+  }
+
+  .mutation-overlay {
+    align-items: center;
+    padding: max(0.75rem, env(safe-area-inset-top, 0px)) 0.65rem max(0.75rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .mutation-panel {
+    max-width: min(400px, calc(100vw - 1.25rem));
+    max-height: min(520px, 85dvh);
+    overflow-y: auto;
+  }
+
+  .antigen-card__bounty {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --reel-row-h: 44px;
+    --app-max: 100%;
+  }
+
+  body {
+    padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
+  }
+
+  .btn {
+    padding: 0.75rem 1.35rem;
+  }
+
+  .btn--xl {
+    width: 100%;
+    max-width: min(22rem, 100%);
+    padding: 0.95rem 1.5rem;
+  }
+
+  .mutation-bar {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .mutation-bar .btn--secondary {
+    width: 100%;
+    max-width: min(20rem, 100%);
+  }
+
+  .reel {
+    max-width: 100px;
+  }
+
+  .slot-machine__reels .reel:nth-child(2) {
+    max-width: 128px;
+  }
+
+  .slot-machine__reels .aa--reel {
+    min-width: 1.22rem;
+    height: 1.22rem;
+    font-size: 0.68rem;
+  }
+
+  .slot-machine__marquee-inner {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+  }
+
+  .slot-row .aa {
+    min-width: 2.35rem;
+    height: 2.35rem;
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .stat-row {
+    grid-template-columns: 4rem minmax(0, 1fr) 1.85rem;
+    gap: 0.35rem;
+  }
+
+  .stat-row__value,
+  .stat-row__max {
+    font-size: 0.9rem;
+  }
 }
