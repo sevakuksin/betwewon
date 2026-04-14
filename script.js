@@ -415,46 +415,72 @@ function computeSpecificity(seq) {
   let s = 6;
   if (nClasses >= 4) s += 1;
   if (nClasses >= 5) s += 1;
+
   if (maxF > 0.5) s -= 3;
+  else if (maxF > 0.44) s -= 2;
   else if (maxF >= 0.43) s -= 1;
 
   const charged = countInSet(seq, new Set([...POSITIVE, ...NEGATIVE]));
   const chFrac = charged / L;
-  if (chFrac >= 0.4) s -= 2;
-  else if (chFrac >= 0.3) s -= 1;
+  if (chFrac >= 0.38) s -= 2;
+  else if (chFrac >= 0.32) s -= 1;
 
-  if (hydrophobicFraction(seq) > 0.5) s -= 2;
-  else if (hydrophobicFraction(seq) >= 0.43) s -= 1;
+  if (hydrophobicFraction(seq) > 0.49) s -= 2;
+  else if (hydrophobicFraction(seq) >= 0.42) s -= 1;
 
   const letterCounts = {};
   for (const a of seq) letterCounts[a] = (letterCounts[a] || 0) + 1;
   const maxLetter = Math.max(...Object.values(letterCounts));
-  const repeatThreshold = Math.max(4, Math.ceil(L * 0.4));
+  const repeatThreshold = Math.max(4, Math.ceil(L * 0.37));
   if (maxLetter >= repeatThreshold) s -= 2;
 
   const posOnly = countInSet(seq, POSITIVE);
-  if (posOnly / L >= 0.3) s -= 1;
+  if (posOnly / L >= 0.27) s -= 1;
 
-  if (chFrac >= 0.2 && hydrophobicFraction(seq) >= 0.35) s -= 1;
+  if (chFrac >= 0.19 && hydrophobicFraction(seq) >= 0.33) s -= 1;
 
   return clamp(s, 0, 10);
 }
 
 /**
+ * Autoimmunity risk % (0–90). Shown in UI; on finalize, autoimmune if random in [0,100) < risk.
+ * Low specificity stacks with “sticky” sequence chemistry; high affinity adds cross-reactivity pressure.
  * @param {string[]} seq
  * @param {number} affinity 0..10
  * @param {number} specificity 0..10
- * @returns {number} percent 0..80
+ * @returns {number} percent 0..85
  */
 function computeAutoimmunityRiskPercent(seq, affinity, specificity) {
-  let risk = 5;
-  if (positiveFraction(seq) > 0.4) risk += 20;
-  if (hydrophobicFraction(seq) > 0.5) risk += 15;
+  const posF = positiveFraction(seq);
+  const hydF = hydrophobicFraction(seq);
+  const chF = chargedFraction(seq);
+
+  let risk = 8;
+
+  if (posF > 0.37) risk += 12;
+  else if (posF > 0.27) risk += 6;
+
+  if (hydF > 0.5) risk += 10;
+  else if (hydF > 0.4) risk += 6;
+
+  if (chF > 0.35) risk += 8;
+  else if (chF > 0.3) risk += 4;
+
   if (affinity >= 9) risk += 10;
-  if (specificity <= 3) risk += 15;
-  /** Murky binding: at max cap, roll is 80% — effectively “almost always” for outreach. */
-  if (specificity < 2) risk = 80;
-  return clamp(risk, 0, 80);
+  else if (affinity >= 8) risk += 6;
+
+  if (specificity <= 2) risk += 22;
+  else if (specificity <= 3) risk += 14;
+  else if (specificity <= 4) risk += 9;
+  else if (specificity <= 5) risk += 5;
+
+  if (specificity <= 4 && chF > 0.28) risk += 6;
+  if (specificity <= 4 && hydF > 0.38) risk += 6;
+  if (specificity <= 3 && posF > 0.2) risk += 8;
+
+  if (specificity <= 2) risk = Math.max(risk, 72);
+
+  return clamp(risk, 0, 85);
 }
 
 /**
@@ -528,6 +554,7 @@ function evaluateOutcome(affinity, riskPercent, seq, specificity, antigen) {
       detail: "",
     };
   }
+  // One roll: autoimmune if U ~ Uniform[0,100) falls below displayed risk %.
   const roll = Math.random() * 100;
   if (roll < riskPercent) {
     const diagnosis = autoimmuneDiagnosisLabel(seq, specificity);
@@ -617,7 +644,6 @@ const el = {
   screenResult: /** @type {HTMLElement} */ (document.getElementById("screen-result")),
   slotReelsStart: /** @type {HTMLElement} */ (document.getElementById("slot-reels-start")),
   slotReelsAntigen: /** @type {HTMLElement} */ (document.getElementById("slot-reels-antigen")),
-  slotContextAntigen: /** @type {HTMLElement} */ (document.getElementById("slot-context-antigen")),
   slotMachineAntigenWrap: /** @type {HTMLElement} */ (document.getElementById("slot-machine-antigen-wrap")),
   slotLever: /** @type {HTMLButtonElement} */ (document.getElementById("slot-lever")),
   slotHintStart: /** @type {HTMLElement} */ (document.getElementById("slot-hint-start")),
@@ -672,6 +698,58 @@ function setRiskCornerVisible(visible) {
 
 function renderSessionScore() {
   el.sessionScoreEl.textContent = String(sessionScore);
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * Wrap chemistry keywords in spans using the same palette as residue capsules.
+ * @param {string} text
+ */
+function highlightRuleSummary(text) {
+  let s = escapeHtml(text);
+  const tokens = [];
+  let t = 0;
+  /** @param {RegExp} re @param {string} cls */
+  function wrapAll(re, cls) {
+    s = s.replace(re, (m) => {
+      const id = `\uE000${t++}\uE000`;
+      tokens.push({ id, html: `<span class="rule-hl rule-hl--${cls}">${m}</span>` });
+      return id;
+    });
+  }
+
+  wrapAll(/\bpositive residues\b/gi, "positive");
+  wrapAll(/\bnegative residues\b/gi, "negative");
+  wrapAll(/\bbulky hydrophobes\b/gi, "hydrophobic");
+  wrapAll(/\bbulky aromatics\b/gi, "hydrophobic");
+  wrapAll(/\btoo much hydrophobic\b/gi, "hydrophobic");
+  wrapAll(/\btoo much polar\b/gi, "polar");
+  wrapAll(/\bhigh charge\b/gi, "charge");
+  wrapAll(/\bhydrophobic packing\b/gi, "hydrophobic");
+  wrapAll(/\bhydrophobicity\b/gi, "hydrophobic");
+  wrapAll(/\bsmall\/flexible\b/gi, "small");
+  wrapAll(/\bshield-like\b/gi, "hydrophobic");
+  wrapAll(/\bhydrophilic\b/gi, "polar");
+  wrapAll(/\bhydrophobic\b/gi, "hydrophobic");
+  wrapAll(/\bpolar\b/gi, "polar");
+  wrapAll(/\baromatics?\b/gi, "hydrophobic");
+  wrapAll(/\bbalanced\b/gi, "balanced");
+  wrapAll(/\bflexible\b/gi, "small");
+  wrapAll(/\bsmall\b/gi, "small");
+  wrapAll(/\bpositive\b/gi, "positive");
+  wrapAll(/\bnegative\b/gi, "negative");
+
+  for (const { id, html } of tokens) {
+    s = s.split(id).join(html);
+  }
+  return s;
 }
 
 /**
@@ -789,23 +867,6 @@ function runSlotReelAnimation(container, segments, onDone) {
   }, lastDur + 320);
 }
 
-/**
- * Faded V/J-like context beside the compact machine on the antigen screen.
- * @param {HTMLElement} container
- * @param {string[]} contextL
- * @param {string[]} contextR
- */
-function renderFlankingContext(container, contextL, contextR) {
-  const left = buildSlotRowHTML(contextL, { role: "context" });
-  const right = buildSlotRowHTML(contextR, { role: "context" });
-  container.innerHTML = `
-    <span class="slot-ellipsis" aria-hidden="true">...</span>
-    ${left}
-    ${right}
-    <span class="slot-ellipsis" aria-hidden="true">...</span>
-  `;
-}
-
 function animateLeverPull() {
   el.slotLever.classList.add("slot-lever--pulled");
   window.setTimeout(() => el.slotLever.classList.remove("slot-lever--pulled"), 480);
@@ -884,14 +945,14 @@ function renderAntigenCards(topTwo) {
   el.antigenCards.innerHTML = topTwo
     .map(
       ({ antigen, affinity }) => `
- <button type="button" class="antigen-card" data-antigen-id="${antigen.id}" aria-label="Select ${antigen.name}, bounty ${antigen.bounty}">
+    <button type="button" class="antigen-card" data-antigen-id="${antigen.id}" aria-label="Select ${antigen.name}, bounty ${antigen.bounty}">
       <div class="antigen-card__bounty" aria-hidden="true">+${antigen.bounty} pts</div>
       <h3 class="antigen-card__name">${antigen.name}</h3>
       <div class="antigen-card__meta">
         <span class="antigen-card__label">${antigen.label}</span>
         <span class="antigen-card__diff">${antigen.difficulty} difficulty</span>
       </div>
-      <p class="antigen-card__rule">${antigen.ruleSummary}</p>
+      <p class="antigen-card__rule">${highlightRuleSummary(antigen.ruleSummary)}</p>
       <div class="antigen-card__score">Match preview: ${affinity}/10 · win adds <strong>${antigen.bounty}</strong> to your score</div>
     </button>
   `
@@ -965,7 +1026,6 @@ function onLeverSpin() {
       mountStaticReels(el.slotReelsAntigen, segments);
       el.slotMachineAntigenWrap.classList.add("slot-machine--landed");
       window.setTimeout(() => el.slotMachineAntigenWrap.classList.remove("slot-machine--landed"), 900);
-      renderFlankingContext(el.slotContextAntigen, state.contextL, state.contextR);
       renderAntigenCards(state.topTwo);
 
       const top = state.topTwo[0];
@@ -988,7 +1048,7 @@ function onChooseAntigen(antigenId) {
   state.mutationPoints = 3;
 
   el.chosenName.textContent = found.name;
-  el.chosenRule.textContent = found.ruleSummary;
+  el.chosenRule.innerHTML = highlightRuleSummary(found.ruleSummary);
   el.chosenBounty.textContent = `Bounty: +${found.bounty} pts if you win`;
 
   showScreen("mutate");
@@ -1121,7 +1181,7 @@ function onFinalize() {
   if (outcome.kind === "success") {
     const gain = state.chosen.bounty;
     sessionScore += gain;
-       el.resultScoreLine.textContent = `+${gain} points! Total score: ${sessionScore}.`;
+    el.resultScoreLine.textContent = `+${gain} points! Total score: ${sessionScore}.`;
   } else if (outcome.kind === "autoimmune") {
     const lost = sessionScore;
     sessionScore = 0;
@@ -1130,7 +1190,9 @@ function onFinalize() {
         ? `SCORE WIPED — you lost all ${lost} points.`
         : `SCORE WIPED — you're already at zero.`;
   } else {
-    el.resultScoreLine.textContent = `Score unchanged: ${sessionScore}.`;
+    const deathPenalty = 30;
+    sessionScore -= deathPenalty;
+    el.resultScoreLine.textContent = `Cell eliminated — −${deathPenalty} points. Total score: ${sessionScore}.`;
   }
   renderSessionScore();
   el.resultScoreLine.classList.remove("hidden");

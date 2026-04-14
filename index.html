@@ -29,37 +29,6 @@
     <section id="screen-start" class="screen screen--active" aria-labelledby="game-title">
       <div class="start-hero">
         <h1 id="game-title" class="title">Bet We Won!</h1>
-        <p class="tagline">Antibodies · B cells · Jackpot epitopes. Pull the lever — V / D / J — pick a target, mutate, bank the bounty.</p>
-      </div>
-
-      <div class="start-casino-floor">
-        <div class="start-side start-side--left">
-          <img src="assets/igg1.png" alt="" class="start-float-img start-float-img--igg" width="120" height="120" />
-          <span class="start-side__cap">Y-shaped high rollers</span>
-        </div>
-
-        <div class="bounty-showcase" aria-label="Featured antigen bounties">
-          <div class="bounty-tile bounty-tile--gold">
-            <img src="assets/betv1.png" alt="" class="bounty-tile__img" width="88" height="88" />
-            <span class="bounty-tile__name">Bet v 1</span>
-            <span class="bounty-tile__prize">100</span>
-          </div>
-          <div class="bounty-tile bounty-tile--red">
-            <img src="assets/dna.png" alt="" class="bounty-tile__img" width="88" height="88" />
-            <span class="bounty-tile__name">dsDNA / nuclear</span>
-            <span class="bounty-tile__prize">45</span>
-          </div>
-          <div class="bounty-tile bounty-tile--green">
-            <img src="assets/covid.png" alt="" class="bounty-tile__img" width="88" height="88" />
-            <span class="bounty-tile__name">SARS-CoV-2</span>
-            <span class="bounty-tile__prize">38</span>
-          </div>
-        </div>
-
-        <div class="start-side start-side--right">
-          <span class="start-side__cap">Germinal center vibes</span>
-          <img src="assets/igg1.png" alt="" class="start-float-img start-float-img--igg2" width="100" height="100" />
-        </div>
       </div>
 
       <div id="slot-machine-start" class="slot-machine" aria-label="CDR3 slot machine">
@@ -82,6 +51,36 @@
           </button>
         </div>
       </div>
+
+      <div class="start-casino-floor" aria-label="Featured bounties and antibodies">
+        <div class="start-side start-side--left">
+          <img src="assets/igg1.png" alt="" class="start-float-img start-float-img--igg" width="120" height="120" />
+          <span class="start-side__cap">Y-shaped high rollers</span>
+        </div>
+
+        <div class="bounty-showcase" aria-label="Jackpot tiles and dsDNA">
+          <div class="bounty-tile bounty-tile--gold">
+            <img src="assets/betv1.png" alt="" class="bounty-tile__img" width="88" height="88" />
+            <span class="bounty-tile__name">Bet v 1</span>
+            <span class="bounty-tile__prize">100</span>
+          </div>
+          <div class="bounty-tile bounty-tile--red bounty-tile--hazard" aria-label="dsDNA">
+            <img src="assets/dna.png" alt="Double-stranded DNA" class="bounty-tile__img bounty-tile__img--dna" width="88" height="88" />
+            <span class="bounty-tile__name">dsDNA</span>
+            <span class="bounty-tile__lupus">Lupus</span>
+          </div>
+          <div class="bounty-tile bounty-tile--green">
+            <img src="assets/covid.png" alt="" class="bounty-tile__img" width="88" height="88" />
+            <span class="bounty-tile__name">SARS-CoV-2</span>
+            <span class="bounty-tile__prize">38</span>
+          </div>
+        </div>
+
+        <div class="start-side start-side--right">
+          <span class="start-side__cap">Germinal center vibes</span>
+          <img src="assets/igg1.png" alt="" class="start-float-img start-float-img--igg2" width="100" height="100" />
+        </div>
+      </div>
     </section>
 
     <!-- ANTIGEN CHOICE (after spin) -->
@@ -92,14 +91,13 @@
       <div id="slot-machine-antigen-wrap" class="slot-machine slot-machine--compact" aria-label="Your CDR3 spin result">
         <div id="slot-reels-antigen" class="slot-machine__reels slot-machine__reels--static"></div>
       </div>
-      <div id="slot-context-antigen" class="slot-context-row" aria-label="Flanking context (decorative)"></div>
 
       <div id="antigen-cards" class="antigen-cards" role="list"></div>
     </section>
 
     <!-- MUTATION / OPTIMIZATION -->
     <section id="screen-mutate" class="screen hidden" aria-labelledby="mutate-heading">
-      <h2 id="mutate-heading" class="heading">Optimize</h2>
+      <h2 id="mutate-heading" class="heading">Mutate!</h2>
 
       <div class="target-banner">
         <span class="target-banner__label">Target</span>
