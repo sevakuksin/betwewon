@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bet We Won!</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="app-header" aria-label="Session score">
+      <div class="app-header__brand">Bet We Won!</div>
+      <div class="app-header__actions">
+        <div class="app-header__score" aria-live="polite">
+          <span class="app-header__score-label">Score</span>
+          <span id="session-score" class="app-header__score-value">0</span>
+        </div>
+        <button type="button" id="btn-restart" class="btn btn--restart">Restart</button>
+      </div>
+    </header>
+
+    <!-- Corner stat: visible during play after spin -->
+    <aside id="risk-corner" class="risk-corner hidden" aria-live="polite">
+      <span class="risk-corner__label">Autoimmunity risk</span>
+      <span id="risk-corner-value" class="risk-corner__value">5%</span>
+    </aside>
+
+    <!-- START -->
+    <section id="screen-start" class="screen screen--active" aria-labelledby="game-title">
+      <div class="start-hero">
+        <h1 id="game-title" class="title">Bet We Won!</h1>
+        <p class="tagline">Antibodies · B cells · Jackpot epitopes. Pull the lever — V / D / J — pick a target, mutate, bank the bounty.</p>
+      </div>
+
+      <div class="start-casino-floor">
+        <div class="start-side start-side--left">
+          <img src="assets/igg1.png" alt="" class="start-float-img start-float-img--igg" width="120" height="120" />
+          <span class="start-side__cap">Y-shaped high rollers</span>
+        </div>
+
+        <div class="bounty-showcase" aria-label="Featured antigen bounties">
+          <div class="bounty-tile bounty-tile--gold">
+            <img src="assets/betv1.png" alt="" class="bounty-tile__img" width="88" height="88" />
+            <span class="bounty-tile__name">Bet v 1</span>
+            <span class="bounty-tile__prize">100</span>
+          </div>
+          <div class="bounty-tile bounty-tile--red">
+            <img src="assets/dna.png" alt="" class="bounty-tile__img" width="88" height="88" />
+            <span class="bounty-tile__name">dsDNA / nuclear</span>
+            <span class="bounty-tile__prize">45</span>
+          </div>
+          <div class="bounty-tile bounty-tile--green">
+            <img src="assets/covid.png" alt="" class="bounty-tile__img" width="88" height="88" />
+            <span class="bounty-tile__name">SARS-CoV-2</span>
+            <span class="bounty-tile__prize">38</span>
+          </div>
+        </div>
+
+        <div class="start-side start-side--right">
+          <span class="start-side__cap">Germinal center vibes</span>
+          <img src="assets/igg1.png" alt="" class="start-float-img start-float-img--igg2" width="100" height="100" />
+        </div>
+      </div>
+
+      <div id="slot-machine-start" class="slot-machine" aria-label="CDR3 slot machine">
+        <div class="slot-machine__marquee" aria-hidden="true">
+          <span class="slot-machine__marquee-inner">* CDR3 JACKPOT * MEDUNI VIENNA *</span>
+        </div>
+        <div class="slot-machine__cabinet">
+          <div class="slot-machine__panel">
+            <div class="slot-machine__panel-shine"></div>
+            <p class="slot-machine__brand">B-CELL LUCKY-10</p>
+            <div id="slot-reels-start" class="slot-machine__reels"></div>
+            <p class="slot-machine__hint" id="slot-hint-start">Pull the lever to spin V · D · J</p>
+          </div>
+          <button type="button" id="slot-lever" class="slot-lever" aria-label="Pull lever to spin the CDR3 reels">
+            <span class="slot-lever__movable">
+              <span class="slot-lever__grip"></span>
+              <span class="slot-lever__arm"></span>
+            </span>
+            <span class="slot-lever__base" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANTIGEN CHOICE (after spin) -->
+    <section id="screen-antigens" class="screen hidden" aria-labelledby="antigen-heading">
+      <h2 id="antigen-heading" class="heading">Pick your target</h2>
+      <p class="hint">Top matches for your CDR3 — bounty paid if you win the round.</p>
+
+      <div id="slot-machine-antigen-wrap" class="slot-machine slot-machine--compact" aria-label="Your CDR3 spin result">
+        <div id="slot-reels-antigen" class="slot-machine__reels slot-machine__reels--static"></div>
+      </div>
+      <div id="slot-context-antigen" class="slot-context-row" aria-label="Flanking context (decorative)"></div>
+
+      <div id="antigen-cards" class="antigen-cards" role="list"></div>
+    </section>
+
+    <!-- MUTATION / OPTIMIZATION -->
+    <section id="screen-mutate" class="screen hidden" aria-labelledby="mutate-heading">
+      <h2 id="mutate-heading" class="heading">Optimize</h2>
+
+      <div class="target-banner">
+        <span class="target-banner__label">Target</span>
+        <span id="chosen-antigen-name" class="target-banner__name"></span>
+        <span id="chosen-antigen-bounty" class="target-banner__bounty"></span>
+        <span id="chosen-antigen-rule" class="target-banner__rule"></span>
+      </div>
+
+      <div id="slot-row-mutate" class="slot-row slot-row--interactive" aria-label="CDR3 — click a residue to mutate"></div>
+      <p class="mutate-hint">Click a tile in the frame to mutate (3 tries).</p>
+
+      <div class="stats-panel" aria-live="polite">
+        <div class="stat-row">
+          <span class="stat-row__label">Affinity</span>
+          <div class="stat-bar-wrap">
+            <div id="bar-affinity" class="stat-bar stat-bar--affinity" style="width: 0%"></div>
+          </div>
+          <span id="val-affinity" class="stat-row__value">0</span><span class="stat-row__max">/10</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-row__label">Specificity</span>
+          <div class="stat-bar-wrap">
+            <div id="bar-specificity" class="stat-bar stat-bar--specificity" style="width: 0%"></div>
+          </div>
+          <span id="val-specificity" class="stat-row__value">0</span><span class="stat-row__max">/10</span>
+        </div>
+        <div class="stat-row stat-row--risk-inline">
+          <span class="stat-row__label">Risk</span>
+          <span id="val-risk-main" class="stat-row__value stat-row__value--risk">5%</span>
+        </div>
+      </div>
+
+      <div class="mutation-bar">
+        <span class="mutation-bar__label">Mutation points</span>
+        <span id="mutation-points" class="mutation-bar__points">3</span>
+        <button type="button" id="btn-finalize" class="btn btn--secondary">Finalize</button>
+      </div>
+
+      <div id="mutation-overlay" class="mutation-overlay hidden" aria-hidden="true">
+        <div id="mutation-panel" class="mutation-panel" role="dialog" aria-label="Choose replacement amino acid">
+          <p class="mutation-panel__title">Replace <strong id="mutation-position-label"></strong></p>
+          <div id="mutation-options" class="mutation-options"></div>
+          <button type="button" id="mutation-cancel" class="btn btn--ghost">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section id="screen-result" class="screen hidden" aria-labelledby="result-heading">
+      <h2 id="result-heading" class="result-title"></h2>
+      <p id="result-score-line" class="result-score-line hidden" aria-live="polite"></p>
+      <p id="result-message" class="result-message"></p>
+      <div id="result-detail" class="result-detail hidden"></div>
+      <button type="button" id="btn-play-again" class="btn btn--primary btn--xl">Play Again</button>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
